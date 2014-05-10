@@ -1,0 +1,10 @@
+.palette{
+	margin-bottom:1em;
+}
+.palette-item{
+	width:4em;
+	height:4em;
+	border:1px solid #000;
+	display:inline-block;
+	margin:0 .5em .5em 0;
+}
