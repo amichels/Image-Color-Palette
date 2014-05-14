@@ -58,36 +58,37 @@
       }
     }
 
-    getPalette(paletteNum);
+    getPalette();
 
   }
 
-  function getPalette(num){
-    for (var i = 0; i < num; i++) {
-      var color = getMax();
-      if(i == 0){
-        appendColor(color);
-      }
-      else{
-        getcomplement(color, baseColor);
-      }
-      baseColor = color;
-    }
+  function getPalette(){
+    var color = getMax();
+    appendColor(color);
+    getComplement(color, paletteNum - 1);
   }
 
-  function getcomplement(color,baseColor){
-    var hsv = colorToObj(color);
-    hueRange = hsv.hue + 120;
-    hueMin = hueRange - 60;
-    hueMax = hueRange + 60;
-    var initColor = -1;
-    while((initColor < hueMin) || (initColor > hueMax)){
-      var max = getMax();
-      var hsv = colorToObj(max);
-      initColor = hsv.hue
+  function getComplement(baseColor, num){
+    console.log(num);
+    if(num > 0){
+      var hsv = colorToObj(baseColor);
+      hueRange = hsv.hue + 120;
+      hueMin = hueRange - 60;
+      hueMax = hueRange + 60;
+      var initColor = -1;
+      while((initColor < hueMin) || (initColor > hueMax)){
+        var max = getMax();
+        var hsv = colorToObj(max);
+        initColor = hsv.hue
+      }
+      var newRGB = HSV2RGB(hsv);
+      appendColor(max);
+      getComplement(max, num - 1);
     }
-    var newRGB = HSV2RGB(hsv);
-    appendColor(max);
+    else{
+      console.log("Done!");
+      return false;
+    }
   }
 
   function getMax(){
