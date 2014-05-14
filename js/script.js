@@ -4,7 +4,8 @@
       picLength = picWidth * picHeight, // number of pixels
       myImage = new Image(), // Create a new blank image.
       frequency = {},
-      paletteNum = 3;
+      paletteNum = 3,
+      baseColor = null;
 
   
   // Load the image and display it.
@@ -57,46 +58,62 @@
       }
     }
 
-    getMaxColor(paletteNum);
+    getPalette(paletteNum);
 
   }
 
-  function getMaxColor(num){
-    // find highest number
+  function getPalette(num){
     for (var i = 0; i < num; i++) {
-      var maxProp = null,
-        maxValue = -1;
-      for (var prop in frequency) {
-        if (frequency.hasOwnProperty(prop)) {
-          var value = frequency[prop]
-          if (value > maxValue) {
-            maxProp = prop
-            maxValue = value
-          }
-        }
-      }
-      delete frequency[maxProp];
+      var color = getMax();
       if(i == 0){
-        var primeColor = maxProp
-        appendColor(maxProp);
+        appendColor(color);
       }
       else{
-        getcomplement(primeColor);
+        getcomplement(color, baseColor);
       }
+      baseColor = color;
     }
   }
 
-  function getcomplement(color){
+  function getcomplement(color,baseColor){
+    var hsv = colorToObj(color);
+    hueRange = hsv.hue + 120;
+    hueMin = hueRange - 60;
+    hueMax = hueRange + 60;
+    var initColor = -1;
+    while((initColor < hueMin) || (initColor > hueMax)){
+      var max = getMax();
+      var hsv = colorToObj(max);
+      initColor = hsv.hue
+    }
+    var newRGB = HSV2RGB(hsv);
+    appendColor(max);
+  }
+
+  function getMax(){
+    var maxProp = null,
+      maxValue = -1;
+    for (var prop in frequency) {
+      if (frequency.hasOwnProperty(prop)) {
+        var value = frequency[prop]
+        if (value > maxValue) {
+          maxProp = prop
+          maxValue = value
+        }
+      }
+    }
+    delete frequency[maxProp];
+    return maxProp;
+  }
+
+  function colorToObj(color){
     var newColor = color.split(",");
-    //var newColor = RGB2HSV(color);
-    var newColorObj = {};
-    newColorObj.r = newColor[0];
-    newColorObj.g = newColor[1];
-    newColorObj.b = newColor[2];
-    var HSV = RGB2HSV(newColorObj);
-    HSV.hue = HSV.hue + 120;
-    var newRGB = HSV2RGB(HSV);
-    console.log(newRGB);
+    var colorObj = {};
+    colorObj.r = newColor[0];
+    colorObj.g = newColor[1];
+    colorObj.b = newColor[2];
+    var hsv = RGB2HSV(colorObj);
+    return hsv;
   }
 
   function appendColor(color){
