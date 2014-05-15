@@ -1,38 +1,44 @@
 //Global variables
-  var picWidth = 500, // width of the canvas
-      picHeight = 695, // height of the canvas
-      picLength = picWidth * picHeight, // number of pixels
-      myImage = new Image(), // Create a new blank image.
+
+  var imageLoader = document.getElementById('imageLoader'),
+      picWidth,
+      picHeight,
+      picLength,
       frequency = {},
-      paletteNum = 3,
-      baseColor = null;
+      paletteNum = 5;
+  imageLoader.addEventListener('change', handleImage, false);
 
-  
-  // Load the image and display it.
-  function displayImage() {
+  function handleImage(e){
+    var reader = new FileReader();
+    reader.onload = function(event){
+      var img = new Image(); // Create a new blank image.
+      img.src = event.target.result;
+      
+      // Load the image and display it.
+      img.onload = function(){
+        console.log("Image loaded.");
 
-    // Get the canvas element.
-    canvas = document.getElementById("myCanvas");
+            picWidth = img.width, // width of the canvas
+            picHeight = img.height, // height of the canvas
+            picLength = picWidth * picHeight; // number of pixels
 
-    // Make sure you got it.
-    if (canvas.getContext) {
+        // Get the canvas element.
+        canvas = document.createElement('canvas');
 
-      // Specify 2d canvas type.
-      ctx = canvas.getContext("2d");
+        // Make sure you got it.
+        if (canvas.getContext) {
+          ctx = canvas.getContext("2d");
 
-      // When the image is loaded, draw it.
-      myImage.onload = function() {
-        // Load the image into the context.
-        ctx.drawImage(myImage, 0, 0);
+          canvas.width=picWidth;
+          canvas.height=picHeight;
+          ctx.drawImage(img, 0, 0, picWidth, picHeight);
+          document.body.appendChild(canvas);
+          getColorData();
 
-        // Get and modify the image data.
-        getColorData();
+        }
       }
-
-      // Define the source of the image.
-      // This file must be on your machine in the same folder as this web page.
-      myImage.src = "images/starwars.jpg";
     }
+    reader.readAsDataURL(e.target.files[0]);     
   }
 
   function getColorData() {
@@ -72,14 +78,16 @@
     console.log(num);
     if(num > 0){
       var hsv = colorToObj(baseColor);
-      hueRange = hsv.hue + 120;
-      hueMin = hueRange - 60;
-      hueMax = hueRange + 60;
+      hueRatio = 360/paletteNum;
+      hueRange = hsv.hue + hueRatio;
+      hueShift = hueRatio/2;
+      hueMin = hueRange - hueShift;
+      hueMax = hueRange + hueShift;
       var initColor = -1;
       while((initColor < hueMin) || (initColor > hueMax)){
         var max = getMax();
         var hsv = colorToObj(max);
-        initColor = hsv.hue
+            initColor = hsv.hue;
       }
       var newRGB = HSV2RGB(hsv);
       appendColor(max);
@@ -93,7 +101,7 @@
 
   function getMax(){
     var maxProp = null,
-      maxValue = -1;
+        maxValue = -1;
     for (var prop in frequency) {
       if (frequency.hasOwnProperty(prop)) {
         var value = frequency[prop]
