@@ -1,14 +1,14 @@
-//Global variables
-
-  var imageLoader = document.getElementById('imageLoader'),
-      picWidth,
-      picHeight,
-      picLength,
-      frequency = {},
-      paletteNum = 5;
-  imageLoader.addEventListener('change', handleImage, false);
-
-  function handleImage(e){
+var palColor = {
+  imageLoader:document.getElementById('imageLoader'),
+  picWidth:null,
+  picHeight:null,
+  picLength:null,
+  frequency: {},
+  paletteNum: 5,
+  init:function(){
+    palColor.imageLoader.addEventListener('change', palColor.handleImage, false)
+  },
+  handleImage:function(e){
     var reader = new FileReader();
     reader.onload = function(event){
       var img = new Image(); // Create a new blank image.
@@ -16,11 +16,11 @@
       
       // Load the image and display it.
       img.onload = function(){
-        console.log("Image loaded.");
+        console.debug("Image loaded.");
 
-            picWidth = img.width, // width of the canvas
-            picHeight = img.height, // height of the canvas
-            picLength = picWidth * picHeight; // number of pixels
+            palColor.picWidth = img.width, // width of the canvas
+            palColor.picHeight = img.height, // height of the canvas
+            palColor.picLength = palColor.picWidth * palColor.picHeight; // number of pixels
 
         // Get the canvas element.
         canvas = document.createElement('canvas');
@@ -29,111 +29,116 @@
         if (canvas.getContext) {
           ctx = canvas.getContext("2d");
 
-          canvas.width=picWidth;
-          canvas.height=picHeight;
-          ctx.drawImage(img, 0, 0, picWidth, picHeight);
+          canvas.width=palColor.picWidth;
+          canvas.height=palColor.picHeight;
+          ctx.drawImage(img, 0, 0, palColor.picWidth, palColor.picHeight);
           document.body.appendChild(canvas);
-          getColorData();
+          palColor.getColorData();
 
         }
       }
     }
-    reader.readAsDataURL(e.target.files[0]);     
-  }
-
-  function getColorData() {
-
-    myImage = ctx.getImageData(0, 0, picWidth, picHeight);
+    reader.readAsDataURL(e.target.files[0]);
+  },
+  getColorData:function(){
+    myImage = ctx.getImageData(0, 0, palColor.picWidth, palColor.picHeight);
 
     // Loop through data.
       // Second bytes are green bytes.
       // Third bytes are blue bytes.
       // Fourth bytes are alpha bytes
-    for (var i = 0; i < picLength * 4; i += 4) {
+    for (var i = 0; i < palColor.picLength * 4; i += 4) {
 
       var r = myImage.data[i],
           g = myImage.data[i+1],
           b = myImage.data[i+2],
           rgb = r+","+g+","+b;
 
-      if(rgb in frequency) {
-          frequency[rgb]++;
+      //avoid black and white
+      if(rgb in palColor.frequency && rgb != "0,0,0" && rgb != "255,255,255") {
+          palColor.frequency[rgb]++;
       }
       else {
-          frequency[rgb] = 1;
+          palColor.frequency[rgb] = 1;
       }
     }
-
-    getPalette();
-
-  }
-
-  function getPalette(){
-    var color = getMax();
-    appendColor(color);
-    getComplement(color, paletteNum - 1);
-  }
-
-  function getComplement(baseColor, num){
-    console.log(num);
+    palColor.getPalette();
+  },
+  getPalette:function(){
+    var color = palColor.getMax();
+    palColor.appendColor(color);
+    palColor.getComplement(color, palColor.paletteNum - 1);
+  },
+  getComplement:function(baseColor, num){
+    console.debug(num);
     if(num > 0){
-      var hsv = colorToObj(baseColor);
-      hueRatio = 360/paletteNum;
-      hueRange = hsv.hue + hueRatio;
-      hueShift = hueRatio/2;
-      hueMin = hueRange - hueShift;
-      hueMax = hueRange + hueShift;
+      var hsv = palColor.colorToObj(baseColor);
+          hueRatio = 360/palColor.paletteNum,
+          hueRange = hsv.hue + hueRatio,
+          hueShift = hueRatio/2,
+          hueMin = hueRange - hueShift,
+          hueMax = hueRange + hueShift;
+
       var initColor = -1;
       while((initColor < hueMin) || (initColor > hueMax)){
-        var max = getMax();
-        var hsv = colorToObj(max);
-            initColor = hsv.hue;
+        var rgb = palColor.getMax(),
+            hsv = palColor.colorToObj(rgb);
+        initColor = hsv.hue;
+        console.log(hsv);
       }
-      var newRGB = HSV2RGB(hsv);
-      appendColor(max);
-      getComplement(max, num - 1);
+
+      //Lighten up dark colors
+      /*if(hsv.value < valMin){
+        hsv.value = valMin;
+      }
+      else if(hsv.value > valMax){
+        hsv.value = valMax;
+      }
+      /*var newRGB = HSV2RGB(hsv);
+      var r = newRGB["r"],
+          g = newRGB["g"],
+          b = newRGB["b"];
+      newRGB = r+","+g+","+b;*/
+      palColor.appendColor(rgb);
+      palColor.getComplement(rgb, num - 1);
     }
     else{
-      console.log("Done!");
+      console.debug("Done!");
       return false;
     }
-  }
-
-  function getMax(){
+  },
+  getMax:function(){
     var maxProp = null,
         maxValue = -1;
-    for (var prop in frequency) {
-      if (frequency.hasOwnProperty(prop)) {
-        var value = frequency[prop]
+    for (var prop in palColor.frequency) {
+      if (palColor.frequency.hasOwnProperty(prop)) {
+        var value = palColor.frequency[prop]
         if (value > maxValue) {
           maxProp = prop
           maxValue = value
         }
       }
     }
-    delete frequency[maxProp];
+    delete palColor.frequency[maxProp];
     return maxProp;
-  }
-
-  function colorToObj(color){
+  },
+  colorToObj:function(color){
     var newColor = color.split(",");
     var colorObj = {};
     colorObj.r = newColor[0];
     colorObj.g = newColor[1];
     colorObj.b = newColor[2];
-    var hsv = RGB2HSV(colorObj);
+    var hsv = palColor.RGB2HSV(colorObj);
     return hsv;
-  }
-
-  function appendColor(color){
+  },
+  appendColor:function(color){
     $(".palette").append("<span class='palette-item'></span>");
     $(".palette-item:last").css("background-color","rgb("+color+")");
-  }
-
-  function RGB2HSV(rgb) {
+  },
+  RGB2HSV:function(rgb){
     var hsv = new Object();
-    var max=max3(rgb.r,rgb.g,rgb.b);
-    var dif=max-min3(rgb.r,rgb.g,rgb.b);
+    var max=palColor.max3(rgb.r,rgb.g,rgb.b);
+    var dif=max-palColor.min3(rgb.r,rgb.g,rgb.b);
     hsv.saturation=(max===0.0)?0:(100*dif/max);
     if (hsv.saturation===0) hsv.hue=0;
     else if (rgb.r==max) hsv.hue=60.0*(rgb.g-rgb.b)/dif;
@@ -144,9 +149,8 @@
     hsv.hue=Math.round(hsv.hue);
     hsv.saturation=Math.round(hsv.saturation);
     return hsv;
-  }
-
-  function HSV2RGB(hsv) {
+  },
+  HSV2RGB:function(hsv){
     var rgb=new Object();
     if (hsv.saturation===0) {
         rgb.r=rgb.g=rgb.b=Math.round(hsv.value*2.55);
@@ -172,12 +176,13 @@
         rgb.b=Math.round(rgb.b*255);
     }
     return rgb;
+  },
+  min3:function(a,b,c){
+    return (a<b)?((a<c)?a:c):((b<c)?b:c);
+  },
+  max3:function(a,b,c){
+    return (a>b)?((a>c)?a:c):((b>c)?b:c); 
   }
+}
 
-  //Might not need min3
-  function min3(a,b,c) { 
-      return (a<b)?((a<c)?a:c):((b<c)?b:c); 
-  } 
-  function max3(a,b,c) { 
-      return (a>b)?((a>c)?a:c):((b>c)?b:c); 
-  }
+palColor.init();
