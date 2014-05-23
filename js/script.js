@@ -1,14 +1,20 @@
 var palColor = {
-  imageLoader:document.getElementById('imageLoader'),
+  imageLoader:document.getElementById('js-imageLoader'),
   picWidth:null,
   picHeight:null,
   picLength:null,
   frequency: {},
   paletteNum: 5,
   init:function(){
-    palColor.imageLoader.addEventListener('change', palColor.handleImage, false)
+    palColor.imageLoader.addEventListener('change', palColor.handleImage, false);
   },
   handleImage:function(e){
+    //Show loader
+    $(".overlay").show();
+
+    //clear palette
+    $(".palette").empty();
+
     var reader = new FileReader();
     reader.onload = function(event){
       var img = new Image(); // Create a new blank image.
@@ -22,6 +28,8 @@ var palColor = {
             palColor.picHeight = img.height, // height of the canvas
             palColor.picLength = palColor.picWidth * palColor.picHeight; // number of pixels
 
+        //delete canvas frist before a new one is created
+        $('canvas').remove();
         // Get the canvas element.
         canvas = document.createElement('canvas');
 
@@ -32,7 +40,7 @@ var palColor = {
           canvas.width=palColor.picWidth;
           canvas.height=palColor.picHeight;
           ctx.drawImage(img, 0, 0, palColor.picWidth, palColor.picHeight);
-          document.body.appendChild(canvas);
+          document.getElementById('js-container').appendChild(canvas);
           palColor.getColorData();
 
         }
@@ -104,6 +112,8 @@ var palColor = {
     }
     else{
       console.debug("Done!");
+      //hide loader since palette generation is done
+      $(".overlay").hide();
       return false;
     }
   },

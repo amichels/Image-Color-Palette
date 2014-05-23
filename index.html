@@ -4,13 +4,19 @@
     <meta charset="utf-8">
     <title>Image Color Palette</title>
 
-	<link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link href='http://fonts.googleapis.com/css?family=Lato:300,400' rel='stylesheet' type='text/css'>
 
   </head>
   
   <body>
-  	<div class="palette"></div>
-  	<input type="file" id="imageLoader" name="imageLoader"/>
+    <div id="js-container" class="container">
+      <h1>Image Color Palette Creator</h1>
+      <p>Choose photo to generate color palette.</p>
+      <input type="file" id="js-imageLoader" class="img-uploader" name="imageLoader"/>
+    	<div class="palette"></div>
+    </div>
+    <div class="overlay"></div>
 
   	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script type="text/javascript" src="js/script.js"></script>

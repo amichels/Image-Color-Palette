@@ -1,7 +1,24 @@
+body{
+	background-color:#2C2C2C;
+	color:#fff;
+	font-family: 'Lato', sans-serif;
+}
+.container{
+	padding:1em;
+}
+h1{
+	font-weight:300;
+}
+.img-uploader{
+	width:100%;
+	margin-bottom:2em;
+	display:block;
+}
 .palette{
 	margin-bottom:1em;
 	padding:1em;
 	background-color:#000;
+	text-align:center;
 }
 .palette-item{
 	width:4em;
@@ -9,4 +26,20 @@
 	border:1px solid #fff;
 	display:inline-block;
 	margin:0 .5em .5em 0;
+}
+canvas{
+	max-width:500px;
+	width:100%;
+	margin:1em auto;
+	display:block;
+}
+.overlay{
+	background:url("../images/loader.gif") no-repeat center center #000;
+	opacity:.5;
+	position:absolute;
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	display:none;
 }
